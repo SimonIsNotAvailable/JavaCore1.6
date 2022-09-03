@@ -36,7 +36,7 @@ public class Main {
 
     private static String listToJson(List<Employee> list) {
         GsonBuilder builder = new GsonBuilder();
-        Gson gson = builder.create();
+        Gson gson = builder.setPrettyPrinting().create();
         Type listType = new TypeToken<List<Employee>>() {}.getType();
         return gson.toJson(list, listType);
     }
