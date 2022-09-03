@@ -3,10 +3,7 @@ import com.google.gson.reflect.TypeToken;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.*;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -28,8 +25,8 @@ public class Main {
                 writer.flush();
                 writer.close();
             }
-        } catch(IOException ex){
-                System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
         }
     }
 
@@ -37,12 +34,13 @@ public class Main {
     private static String listToJson(List<Employee> list) {
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.setPrettyPrinting().create();
-        Type listType = new TypeToken<List<Employee>>() {}.getType();
+        Type listType = new TypeToken<List<Employee>>() {
+        }.getType();
         return gson.toJson(list, listType);
     }
 
-    public static List<Employee> parseCSV (String[] columnMapping, String fileName) {
-        try (CSVReader data = new CSVReader(new FileReader(fileName))){
+    public static List<Employee> parseCSV(String[] columnMapping, String fileName) {
+        try (CSVReader data = new CSVReader(new FileReader(fileName))) {
             ColumnPositionMappingStrategy<Employee> ColPosStr = new ColumnPositionMappingStrategy<>();
             ColPosStr.setType(Employee.class);
             ColPosStr.setColumnMapping(columnMapping);
@@ -50,8 +48,7 @@ public class Main {
                     .withMappingStrategy(ColPosStr)
                     .build();
             return toBean.parse();
-        }
-         catch (Exception E) {
+        } catch (Exception E) {
             E.printStackTrace();
         }
         return null;
