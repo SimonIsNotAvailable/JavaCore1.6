@@ -8,6 +8,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.*;
 import java.io.*;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -18,14 +19,15 @@ public class Main {
         String fileName = "C:\\Users\\user\\IdeaProjects\\JavaCore1.6\\Parser\\data.csv";
         List<Employee> list = parseCSV(columnMapping, fileName);
         String json = listToJson(list);
-        writeString(json);
+        String newName = "data.json";
+        writeString(json, newName);
 
         //XML to JSON parser
-
         String fileNameXML = "C:\\Users\\user\\IdeaProjects\\JavaCore1.6\\Parser\\data.xml";
         try {
             List<Employee> listXML = parseXML(fileNameXML);
-            writeString(listToJson(listXML));
+            String newName1 = "data1.json";
+            writeString(listToJson(listXML), newName1);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -35,33 +37,52 @@ public class Main {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(new File(filename));
-        Node root = doc.getDocumentElement();
-        read(root);
-
-        return null;
+        NodeList root = doc.getDocumentElement().getElementsByTagName("employee");
+        return read(root);
     }
 
+    private static long id;
+    private static String fn;
+    private static String ln;
+    private static String cntr;
+    private static int age;
 
-    private static void read(Node node) {
-        NodeList nodeList = node.getChildNodes();
+    private static List<Employee> read(NodeList nodeList) {
+        List<Employee> employeeList = new ArrayList<>();
         for (int i = 0; i < nodeList.getLength(); i++) {
-            Node node_ = nodeList.item(i);
-            if (Node.ELEMENT_NODE == node_.getNodeType()) {
-                System.out.println("Текущий узел: " + node_.getNodeName());
-                Element element = (Element) node_;
-                NamedNodeMap map = element.getAttributes();
-                for (int a = 0; a < map.getLength(); a++) {
-                    String attrName = map.item(a).getNodeName();
-                    String attrValue = map.item(a).getNodeValue();
-                    System.out.println("Атрибут: " + attrName + "; значение: " + attrValue);
+            Node node = nodeList.item(i);
+            NodeList newNodeList = node.getChildNodes();
+            for (int j = 0; j < newNodeList.getLength(); j++) {
+                switch (newNodeList.item(j).getNodeName()) {
+                    case "id":
+                        id = Long.parseLong(newNodeList.item(j).getTextContent());
+                        break;
+                    case "firstName":
+                        fn = newNodeList.item(j).getTextContent();
+                        break;
+                    case "lastName":
+                        ln = newNodeList.item(j).getTextContent();
+                        break;
+                    case "country":
+                        cntr = newNodeList.item(j).getTextContent();
+                        break;
+                    case "age":
+                        age = Integer.parseInt(newNodeList.item(j).getTextContent());
+                        break;
                 }
-                read(node_);
             }
+            try {
+                employeeList.add(new Employee(id, fn, ln, cntr, age));
+            }
+                catch (NullPointerException e) {
+                e.printStackTrace();
+                }
         }
+        return employeeList;
     }
 
-    private static void writeString(String json) {
-        File data = new File("C:\\Users\\user\\IdeaProjects\\JavaCore1.6\\Parser\\data.json");
+    private static void writeString(String json, String name) {
+        File data = new File("C:\\Users\\user\\IdeaProjects\\JavaCore1.6\\Parser\\" + name);
         try {
             if (data.createNewFile()) {
                 FileWriter writer = new FileWriter(data);
@@ -73,7 +94,6 @@ public class Main {
             System.out.println(ex.getMessage());
         }
     }
-
 
     private static String listToJson(List<Employee> list) {
         GsonBuilder builder = new GsonBuilder();
